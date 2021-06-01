@@ -1,15 +1,35 @@
 import sys
+import threading
 import time
-from PyQt5.QtCore import QTimer, QTime
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 import numpy as np
 from numpy.core.arrayprint import DatetimeFormat
 from matplotlib.backends.backend_qt5agg import FigureCanvas as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import Data_Packet as DP
+from threading import Thread
+import atexit
 
+rxdataList = []
+quit_flag = False
+
+def quit_Action():
+    global quit_flag
+    quit_flag = True
+atexit.register(quit_Action)
+
+class ComboBox(QComboBox):
+    popupAboutToBeShown = QtCore.pyqtSignal()
+
+    def showPopup(self):
+        self.popupAboutToBeShown.emit()
+        super(ComboBox, self).showPopup()
 
 class ArduinoApp(QMainWindow):
+    global rxdataList
     def __init__(self):
         super().__init__()
 
@@ -34,6 +54,7 @@ class ArduinoApp(QMainWindow):
 
         # LCD 1 ComboBox #
         self.cb_lcd_1 = QComboBox(self)
+        self.cb_lcd_1.activated.connect(self.load_DataList)
         gbox.addWidget(self.cb_lcd_1, 1, 0, 1, 1)
 
         # LCD Widget 1 #
@@ -44,6 +65,7 @@ class ArduinoApp(QMainWindow):
 
         # LCD 2 ComboBox #
         self.cb_lcd_2 = QComboBox(self)
+        self.cb_lcd_2.activated.connect(self.load_DataList)
         gbox.addWidget(self.cb_lcd_2, 2, 0, 1, 1)
         
         # LCD Widget 2 #
@@ -54,6 +76,7 @@ class ArduinoApp(QMainWindow):
 
         # LCD 3 ComboBox #
         self.cb_lcd_3 = QComboBox(self)
+        self.cb_lcd_3.activated.connect(self.load_DataList)
         gbox.addWidget(self.cb_lcd_3, 3, 0, 1, 1)
         
         # LCD Widget 3 #
@@ -68,6 +91,7 @@ class ArduinoApp(QMainWindow):
 
         # Data Plot ComboBox #
         self.cb_data_plot = QComboBox(self)
+        self.cb_data_plot.highlighted.connect(self.load_DataList)
         gbox.addWidget(self.cb_data_plot, 0, 7)
 
         # Data Plot #
@@ -87,6 +111,14 @@ class ArduinoApp(QMainWindow):
         self.setWindowTitle('Arduino Monitor')
         self.setGeometry(300, 100, 600, 400)
         self.show()
+    def load_DataList(self):
+        global rxdataList
+        print("Load")
+        for i in range(len(rxdataList)):
+            self.cb_data_plot.additem(rxdataList[i].get_ID())
+            self.cb_lcd_1.additem(rxdataList[i].get_ID())
+            self.cb_lcd_2.additem(rxdataList[i].get_ID())
+            self.cb_lcd_3.additem(rxdataList[i].get_ID())
 
     def connect_Function(self):
         # Serial Connect Part #
@@ -107,7 +139,40 @@ class ArduinoApp(QMainWindow):
         if id(sender) == id(self.timer):
             self.lcd_1.display(currentTime)
 
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        global quit_flag
+        quit_flag = True
+        return super().closeEvent(a0)
+
+def debug_Input():
+    global rxdataList
+    while not quit_flag:
+        rw = input("RW: ")
+        id = input("ID: ")
+        data = input("DATA: ")
+
+        if not rxdataList:
+            rxdataList.append(DP.arduinoData())
+            rxdataList[-1].update_ID(id)
+            rxdataList[-1].update_Data(data)
+        else:
+            update = False
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == id:
+                    rxdataList[i].update_Data(data)
+                    update = True
+                else:
+                    pass
+            if update == False:
+                rxdataList.append(DP.arduinoData())
+                rxdataList[-1].update_ID(id)
+                rxdataList[-1].update_Data(data)
+        for i in range(len(rxdataList)):
+            print(rxdataList[i].get_ID(), ": ", rxdataList[i].get_Data())
+
 if __name__ == '__main__':
+    task1 = Thread(target=debug_Input, args=())
+    task1.start()
     app = QApplication(sys.argv)
     ex = ArduinoApp()
     sys.exit(app.exec_())

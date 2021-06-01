@@ -19,19 +19,23 @@
 
 ## 2021-05-25
 
-.- 최초 업로드
+- 최초 업로드
 
 ---
 
 ## 2021-05-31
 
-.- QTimer를 이용해 주기적인 그래프 업데이트 기능 추가
+- QTimer를 이용해 주기적인 그래프 업데이트 기능 추가
 
-.- Connect 버튼을 추가하여 Timer 구동
+- Connect 버튼을 추가하여 Timer 구동
 
-.- LCD 디스플레이 추가
+- LCD 디스플레이 추가
 
-.- Widget에 Combo Box를 달아 Data 매칭 계획
+- Widget에 Combo Box를 달아 Data 매칭 계획
 
+---
 
+## 2021-06-01
+
+- Packet Module 작성
 
