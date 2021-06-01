@@ -22,7 +22,7 @@ def quit_Action():
 atexit.register(quit_Action)
 
 class ComboBox(QComboBox):
-    popupAboutToBeShown = QtCore.pyqtSignal()
+    popupAboutToBeShown = pyqtSignal()
 
     def showPopup(self):
         self.popupAboutToBeShown.emit()
@@ -53,7 +53,7 @@ class ArduinoApp(QMainWindow):
         gbox.addWidget(self.bt_logging, 0, 4, 1, 1)
 
         # LCD 1 ComboBox #
-        self.cb_lcd_1 = QComboBox(self)
+        self.cb_lcd_1 = ComboBox(self)
         self.cb_lcd_1.activated.connect(self.load_DataList)
         gbox.addWidget(self.cb_lcd_1, 1, 0, 1, 1)
 
