@@ -39,3 +39,29 @@
 
 - Packet Module 작성
 
+- Packet Module Test
+
+  : Checksum Encode/Decode 확인
+
+- Thread Test
+
+  : Debug용 Thread 테스트
+
+- 종료 Event 관련 정의 
+
+  : 타 Thread 종료 시그널
+
+---
+
+## 2021-06-04
+
+- ComboBox 데이터 연결 구축
+
+  : ComboBox에서 선택한 데이터 ID를 실제 Data에 연결하여 Update
+
+- x ms 주기로 현재 데이터 Update
+
+- ComboBox Event 분리
+
+
+

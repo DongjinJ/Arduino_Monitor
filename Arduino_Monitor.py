@@ -14,6 +14,7 @@ from threading import Thread
 import atexit
 
 rxdataList = []
+dataTable = [-1, -1, -1, -1]
 quit_flag = False
 
 def quit_Action():
@@ -54,7 +55,8 @@ class ArduinoApp(QMainWindow):
 
         # LCD 1 ComboBox #
         self.cb_lcd_1 = ComboBox(self)
-        self.cb_lcd_1.activated.connect(self.load_DataList)
+        self.cb_lcd_1.activated[str].connect(self.select_data_lcd1)
+        self.cb_lcd_1.popupAboutToBeShown.connect(self.load_DataList_lcd1)
         gbox.addWidget(self.cb_lcd_1, 1, 0, 1, 1)
 
         # LCD Widget 1 #
@@ -64,34 +66,37 @@ class ArduinoApp(QMainWindow):
         gbox.addWidget(self.lcd_1, 1, 1, 1, 3)
 
         # LCD 2 ComboBox #
-        self.cb_lcd_2 = QComboBox(self)
-        self.cb_lcd_2.activated.connect(self.load_DataList)
-        gbox.addWidget(self.cb_lcd_2, 2, 0, 1, 1)
+        self.cb_lcd_2 = ComboBox(self)
+        self.cb_lcd_2.activated[str].connect(self.select_data_lcd2)
+        self.cb_lcd_2.popupAboutToBeShown.connect(self.load_DataList_lcd2)
+        gbox.addWidget(self.cb_lcd_2, 3, 0, 1, 1)
         
         # LCD Widget 2 #
         self.lcd_2 = QLCDNumber(self)
         self.lcd_2.display('0')
         self.lcd_2.setDigitCount(8)
-        gbox.addWidget(self.lcd_2, 2, 1, 1, 3)
+        gbox.addWidget(self.lcd_2, 3, 1, 1, 3)
 
         # LCD 3 ComboBox #
-        self.cb_lcd_3 = QComboBox(self)
-        self.cb_lcd_3.activated.connect(self.load_DataList)
-        gbox.addWidget(self.cb_lcd_3, 3, 0, 1, 1)
+        self.cb_lcd_3 = ComboBox(self)
+        self.cb_lcd_3.activated[str].connect(self.select_data_lcd3)
+        self.cb_lcd_3.popupAboutToBeShown.connect(self.load_DataList_lcd3)
+        gbox.addWidget(self.cb_lcd_3, 5, 0, 1, 1)
         
         # LCD Widget 3 #
         self.lcd_3 = QLCDNumber(self)
         self.lcd_3.display('0.0')
         self.lcd_3.setDigitCount(8)
-        gbox.addWidget(self.lcd_3, 3, 1, 1, 3)
+        gbox.addWidget(self.lcd_3, 5, 1, 1, 3)
 
         # Data Plot Label #
         self.lb_data_plot = QLabel('Plot Data', self)
         gbox.addWidget(self.lb_data_plot, 0, 6)
 
         # Data Plot ComboBox #
-        self.cb_data_plot = QComboBox(self)
-        self.cb_data_plot.highlighted.connect(self.load_DataList)
+        self.cb_data_plot = ComboBox(self)
+        self.cb_data_plot.activated[str].connect(self.select_data_plot)
+        self.cb_data_plot.popupAboutToBeShown.connect(self.load_DataList_plot)
         gbox.addWidget(self.cb_data_plot, 0, 7)
 
         # Data Plot #
@@ -106,19 +111,75 @@ class ArduinoApp(QMainWindow):
         # x ms Timer (x는 조정 필요) #
         self.timer = QTimer(self)
         self.timer.setInterval(100)
-        self.timer.timeout.connect(self.update_plot)
+        self.timer.timeout.connect(self.update_Data)
 
         self.setWindowTitle('Arduino Monitor')
         self.setGeometry(300, 100, 600, 400)
         self.show()
-    def load_DataList(self):
+
+    def select_data_plot(self, cur_ID):
+        if cur_ID != '':
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == cur_ID:
+                    dataTable[0] = i
+                    break
+        else:
+            dataTable[0] = -1
+
+    def select_data_lcd1(self, cur_ID):
+        if cur_ID != '':
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == cur_ID:
+                    dataTable[1] = i
+                    break
+        else:
+            dataTable[1] = -1
+
+    def select_data_lcd2(self, cur_ID):
+        if cur_ID != '':
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == cur_ID:
+                    dataTable[2] = i
+                    break
+        else:
+            dataTable[2] = -1
+
+    def select_data_lcd3(self, cur_ID):
+        if cur_ID != '':
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == cur_ID:
+                    dataTable[3] = i
+                    break
+        else:
+            dataTable[3] = -1
+
+    def load_DataList_plot(self):
         global rxdataList
-        print("Load")
+        self.cb_data_plot.clear()
+        self.cb_data_plot.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_data_plot.additem(rxdataList[i].get_ID())
-            self.cb_lcd_1.additem(rxdataList[i].get_ID())
-            self.cb_lcd_2.additem(rxdataList[i].get_ID())
-            self.cb_lcd_3.additem(rxdataList[i].get_ID())
+            self.cb_data_plot.addItem(rxdataList[i].get_ID())
+
+    def load_DataList_lcd1(self):
+        global rxdataList
+        self.cb_lcd_1.clear()
+        self.cb_lcd_1.addItem('')
+        for i in range(len(rxdataList)):
+            self.cb_lcd_1.addItem(rxdataList[i].get_ID())
+
+    def load_DataList_lcd2(self):
+        global rxdataList
+        self.cb_lcd_2.clear()
+        self.cb_lcd_2.addItem('')
+        for i in range(len(rxdataList)):
+            self.cb_lcd_2.addItem(rxdataList[i].get_ID())
+
+    def load_DataList_lcd3(self):
+        global rxdataList
+        self.cb_lcd_3.clear()
+        self.cb_lcd_3.addItem('')
+        for i in range(len(rxdataList)):
+            self.cb_lcd_3.addItem(rxdataList[i].get_ID())
 
     def connect_Function(self):
         # Serial Connect Part #
@@ -127,17 +188,21 @@ class ArduinoApp(QMainWindow):
     def logging_Function(self):
         self.timer.start()
 
-    def update_plot(self):
-        self.data_plot.clear()
-        t = time.time()
-        self.x_data.append(t)
-        self.y_data.append(np.sin(t))
-        self.data_plot.plot(self.x_data, self.y_data, '-', color='deeppink')
-        self.data_plot.figure.canvas.draw()
-        sender = self.sender()
-        currentTime = QTime.currentTime().toString("hh:mm:ss")
-        if id(sender) == id(self.timer):
-            self.lcd_1.display(currentTime)
+    def update_Data(self):
+        if dataTable[0] != -1:
+            self.data_plot.clear()
+            t = time.time()
+            self.x_data.append(t)
+            self.y_data.append(rxdataList[dataTable[0]].get_Data())
+            self.data_plot.plot(self.x_data, self.y_data, '-', color='deeppink')
+            self.data_plot.figure.canvas.draw()
+        if dataTable[1] != -1:
+            self.lcd_1.display(str(rxdataList[dataTable[1]].get_Data()))
+        if dataTable[2] != -1:
+            self.lcd_1.display(str(rxdataList[dataTable[2]].get_Data()))
+        if dataTable[3] != -1:
+            self.lcd_1.display(str(rxdataList[dataTable[3]].get_Data()))
+
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         global quit_flag
