@@ -9,11 +9,24 @@
 ## To Do
 
 - [x] Timer 구현
+
 - [ ] Serial Connect 구현
+
 - [x] Layout 구성
-- [ ] Protocol 정립
-- [ ] 데이터 별 Widget 연결
-- [ ] 데이터 Class 구축 필요
+
+  Grid -> setGeometry
+
+- [x] Protocol 정립
+
+- [x] 데이터 별 Widget 연결
+
+- [x] 데이터 Class 구축 필요
+
+- [ ] 실제 Serial Data를 통해 Debugging 필요
+
+  : 현재 Terminal input값으로는 테스트 잘됨
+
+- [ ] Gauge UI 적용
 
 ---
 
@@ -63,5 +76,36 @@
 
 - ComboBox Event 분리
 
+---
 
+## 2021-06-10
+
+- Grid 배치에서 Pixel 좌표 배치로 변경
+
+  : 크기 조절 및 배치 자유도때문에 변경
+
+  : 적용 완료
+
+- matplotlib의 plot 에서 Y축이 정렬되어 표시되지 않는 문제 발생
+
+  -> str type이라 정렬 안됨. int형으로 변환 후 해결
+
+- Gauge  그리는 함수 작업 착수
+
+  : https://github.com/StefanHol/AnalogGaugeWidgetPyQt/blob/bb92101babda5c93337635d262cc2df3799c56f0/analoggaugewidget.py#L496
+
+  참고
+
+
+---
+
+## 2021-06-15
+
+- Gauge 작업 중
+
+  : 직접 Polygon 원 위 좌표 구하는 방식으로 구현 예정
+
+  : 눈금 작업 필요
+
+  : 바늘 구현 vs 게이지 스펙트럼 
 
