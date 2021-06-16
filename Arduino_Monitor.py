@@ -38,10 +38,13 @@ class ArduinoApp(QMainWindow):
 
         self.pen = QPen(QColor(0, 0, 0, 255))
         self.pen.setWidth(2)
-        self.set_scale_polygon_colors = ([[.00, Qt.red],
+        self.testValue = 0
+
+        self.scale_polygon_colors = []
+        self.set_scale_polygon_colors([[.00, Qt.red],
                                      [.1, Qt.yellow],
                                      [.15, Qt.green],
-                                     [1, Qt.transparent]])
+                                     [1., Qt.transparent]])
 
         # Serial Port ComboBox #
         self.cb_port = ComboBox(self)
@@ -141,14 +144,29 @@ class ArduinoApp(QMainWindow):
 
     def paintEvent(self, event):
         self.draw_Gauge(165, 370)
-        
+        self.draw_scaled_marker(165, 370)
+        self.draw_Needle(165, 370, self.testValue)
+
+    def draw_Needle(self, x_center, y_center, value):
+        my_painter = QPainter(self)
+        my_painter.setRenderHint(QPainter.Antialiasing)
+        self.pen = QPen(QColor(50, 50, 50, 255))
+        self.pen.setWidth(2)
+        my_painter.setPen(self.pen)
+        if value > 180:
+            value = 180
+        theta = (270 / 180) * value + 135
+        x = x_center + math.cos(math.radians(theta)) * 60
+        y = y_center + math.sin(math.radians(theta)) * 60
+        my_painter.drawLine(x_center, y_center, x, y)
+        my_painter.end()
 
     def draw_Gauge(self, x_center, y_center):
         self.painter_filled_polygon = QPainter(self)
         self.painter_filled_polygon.setRenderHint(QPainter.Antialiasing)
-        self.painter_filled_polygon.translate(self.width() / 2, self.height() / 2)
         self.painter_filled_polygon.setPen(Qt.NoPen)
-        self.painter_filled_polygon.drawPoint(x_center, y_center)
+        self.painter_filled_polygon.setBrush(QColor(50, 50, 50, 255))
+        self.painter_filled_polygon.drawEllipse(int(x_center - 7.5), int(y_center - 7.5), 15, 15)
 
         self.polygon = QPolygonF()
         length = 100
@@ -161,12 +179,56 @@ class ArduinoApp(QMainWindow):
             x = x_center + math.cos(math.radians(theta)) * length
             y = y_center + math.sin(math.radians(theta)) * length
             self.polygon.append(QPoint(x, y))
-        #self.grad = 
-        self.painter_filled_polygon.setPen(QPen(Qt.black, 2))
+        self.polygon.append(QPoint(x, y))
+        self.grad = QConicalGradient(QPointF(0,0), -100)
+        for eachcolor in self.scale_polygon_colors:
+            self.grad.setColorAt(eachcolor[0], eachcolor[1])
+        self.painter_filled_polygon.setPen(Qt.NoPen)
+        self.painter_filled_polygon.setBrush(self.grad)
+        #self.painter_filled_polygon.setPen(QPen(Qt.black, 2))
         self.painter_filled_polygon.drawPolygon(self.polygon)
         self.painter_filled_polygon.end()
 
+    def draw_scaled_marker(self, x_center, y_center):
+        my_painter = QPainter(self)
+        my_painter.setRenderHint(QPainter.Antialiasing)
+        self.pen = QPen(QColor(0,0,0,255))
+        self.pen.setWidth(2)
+        my_painter.setPen(self.pen)
+        font = QFont("Decorative", 15)
+        fm = QFontMetrics(font)
 
+        for theta in range(135, 415, 15):
+            i = (theta - 135) / 15 * 10
+            text = str(int(i))
+            w = fm.width(text) + 1
+            h = fm.height()
+            x_1 = x_center + math.cos(math.radians(theta)) * 95
+            y_1 = y_center + math.sin(math.radians(theta)) * 95
+            x_2 = x_center + math.cos(math.radians(theta)) * 104
+            y_2 = y_center + math.sin(math.radians(theta)) * 104
+            x = x_center + math.cos(math.radians(theta)) * 80
+            y = y_center + math.sin(math.radians(theta)) * 80
+            my_painter.drawText(x - int(w/2), y - int(h/2), int(w), int(h), Qt.AlignCenter, text)
+            my_painter.drawLine(x_1, y_1, x_2, y_2)
+        for theta in range(135, 405, 3):
+            x_1 = x_center + math.cos(math.radians(theta)) * 100
+            y_1 = y_center + math.sin(math.radians(theta)) * 100
+            x_2 = x_center + math.cos(math.radians(theta)) * 104
+            y_2 = y_center + math.sin(math.radians(theta)) * 104
+            my_painter.drawLine(x_1, y_1, x_2, y_2)
+
+        my_painter.end()
+
+    def set_scale_polygon_colors(self, color_array):
+        # print(type(color_array))
+        if 'list' in str(type(color_array)):
+            self.scale_polygon_colors = color_array
+        elif color_array == None:
+            self.scale_polygon_colors = [[.0, Qt.transparent]]
+        else:
+            self.scale_polygon_colors = [[.0, Qt.transparent]]
+    
     def select_data_plot(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
@@ -239,6 +301,7 @@ class ArduinoApp(QMainWindow):
         self.timer.start()
 
     def update_Data(self):
+        self.update()
         if dataTable[0] != -1:
             self.data_plot.clear()
             t = time.time()
