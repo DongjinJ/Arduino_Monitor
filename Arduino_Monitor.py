@@ -42,8 +42,8 @@ class ArduinoApp(QMainWindow):
 
         self.scale_polygon_colors = []
         self.set_scale_polygon_colors([[.00, Qt.red],
-                                     [.1, Qt.yellow],
-                                     [.15, Qt.green],
+                                     [.4, Qt.yellow],
+                                     [.8, Qt.green],
                                      [1., Qt.transparent]])
 
         # Serial Port ComboBox #
@@ -158,7 +158,7 @@ class ArduinoApp(QMainWindow):
         theta = (270 / 180) * value + 135
         x = x_center + math.cos(math.radians(theta)) * 60
         y = y_center + math.sin(math.radians(theta)) * 60
-        my_painter.drawLine(x_center, y_center, x, y)
+        my_painter.drawLine(x_center, y_center, int(x), int(y))
         my_painter.end()
 
     def draw_Gauge(self, x_center, y_center):
@@ -209,14 +209,14 @@ class ArduinoApp(QMainWindow):
             y_2 = y_center + math.sin(math.radians(theta)) * 104
             x = x_center + math.cos(math.radians(theta)) * 80
             y = y_center + math.sin(math.radians(theta)) * 80
-            my_painter.drawText(x - int(w/2), y - int(h/2), int(w), int(h), Qt.AlignCenter, text)
-            my_painter.drawLine(x_1, y_1, x_2, y_2)
+            my_painter.drawText(int(x - w/2), int(y - h/2), int(w), int(h), Qt.AlignCenter, text)
+            my_painter.drawLine(int(x_1), int(y_1), int(x_2), int(y_2))
         for theta in range(135, 405, 3):
             x_1 = x_center + math.cos(math.radians(theta)) * 100
             y_1 = y_center + math.sin(math.radians(theta)) * 100
             x_2 = x_center + math.cos(math.radians(theta)) * 104
             y_2 = y_center + math.sin(math.radians(theta)) * 104
-            my_painter.drawLine(x_1, y_1, x_2, y_2)
+            my_painter.drawLine(int(x_1), int(y_1), int(x_2), int(y_2))
 
         my_painter.end()
 
