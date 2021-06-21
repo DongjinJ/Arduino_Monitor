@@ -134,3 +134,19 @@
   : 함수 초안 작업 중
 
   : Python 에서 endian 확인 필요
+
+---
+
+## 2021-06-21
+
+- Gauge 작업
+
+  : ConicalGradient 이해 완료
+
+  : Gauge 스펙트럼 수정
+
+- monitor_Packet 관련 수정
+
+  : Byte Order차이에 따른 수정
+
+  : Decoding 로직 및 Checksum 확인 로직 추가

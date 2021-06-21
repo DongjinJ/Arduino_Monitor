@@ -14,6 +14,6 @@ typedef union packet_tag{
 }packet;
 
 extern packet Encoding_Packet(uint8_t rw, uint8_t id, uint8_t data);
-extern uint8_t Decoding_Packet(packet rx_packet);
+extern packet Decoding_Packet(uint8_t *rx_packet);
 extern uint8_t Create_Checksum(packet noChecksumPacket);
 extern uint8_t Check_Checksum(packet ChecksumPacket);

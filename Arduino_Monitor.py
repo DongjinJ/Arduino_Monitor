@@ -173,14 +173,14 @@ class ArduinoApp(QMainWindow):
         for theta in range(135, 405):
             x = x_center + math.cos(math.radians(theta)) * length
             y = y_center + math.sin(math.radians(theta)) * length
-            self.polygon.append(QPoint(x, y))
+            self.polygon.append(QPointF(x, y))
         length = 105
         for theta in range(135, 405):
             x = x_center + math.cos(math.radians(theta)) * length
             y = y_center + math.sin(math.radians(theta)) * length
-            self.polygon.append(QPoint(x, y))
-        self.polygon.append(QPoint(x, y))
-        self.grad = QConicalGradient(QPointF(0,0), -100)
+            self.polygon.append(QPointF(x, y))
+        self.polygon.append(QPointF(x, y))
+        self.grad = QConicalGradient(QPointF(x_center,y_center), -45)
         for eachcolor in self.scale_polygon_colors:
             self.grad.setColorAt(eachcolor[0], eachcolor[1])
         self.painter_filled_polygon.setPen(Qt.NoPen)
