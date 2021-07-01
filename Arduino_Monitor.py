@@ -1,5 +1,4 @@
 import sys
-import threading
 import time
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -13,9 +12,10 @@ import Data_Packet as DP
 from threading import Thread
 import atexit
 import math
+import serial
 
 rxdataList = []
-dataTable = [-1, -1, -1, -1]
+dataTable = [-1, -1, -1, -1, -1]
 quit_flag = False
 
 def quit_Action():
@@ -38,7 +38,8 @@ class ArduinoApp(QMainWindow):
 
         self.pen = QPen(QColor(0, 0, 0, 255))
         self.pen.setWidth(2)
-        self.testValue = 0
+        self.gauge_data = 0
+        self.gauge_data_prev = 0
 
         self.scale_polygon_colors = []
         self.set_scale_polygon_colors([[.00, Qt.red],
@@ -108,6 +109,12 @@ class ArduinoApp(QMainWindow):
         self.lcd_3.setDigitCount(8)
         self.lcd_3.setGeometry(125, 190, 190, 60)
 
+        # Gauge ComboBox #
+        self.cb_gauge = ComboBox(self)
+        self.cb_gauge.addItem("Gauge")
+        self.cb_gauge.activated[str].connect(self.select_data_gauge)
+        self.cb_gauge.popupAboutToBeShown.connect(self.load_DataList_gauge)
+        self.cb_gauge.setGeometry(15, 240, 100, 25)
 
         # Data Plot Label #
         self.lb_data_plot = QLabel('Plot Data: ', self)
@@ -135,7 +142,7 @@ class ArduinoApp(QMainWindow):
 
         # x ms Timer (x는 조정 필요) #
         self.timer = QTimer(self)
-        self.timer.setInterval(100)
+        self.timer.setInterval(50)
         self.timer.timeout.connect(self.update_Data)
 
         self.setWindowTitle('Arduino Monitor')
@@ -145,7 +152,12 @@ class ArduinoApp(QMainWindow):
     def paintEvent(self, event):
         self.draw_Gauge(165, 370)
         self.draw_scaled_marker(165, 370)
-        self.draw_Needle(165, 370, self.testValue)
+        if self.gauge_data != self.gauge_data_prev:
+            if self.gauge_data_prev > self.gauge_data:
+                self.gauge_data_prev -= 1
+            elif self.gauge_data_prev < self.gauge_data:
+                self.gauge_data_prev += 1
+        self.draw_Needle(165, 370, self.gauge_data_prev)
 
     def draw_Needle(self, x_center, y_center, value):
         my_painter = QPainter(self)
@@ -264,6 +276,15 @@ class ArduinoApp(QMainWindow):
                     break
         else:
             dataTable[3] = -1
+    
+    def select_data_gauge(self, cur_ID):
+        if cur_ID != '':
+            for i in range(len(rxdataList)):
+                if rxdataList[i].get_ID() == cur_ID:
+                    dataTable[4] = i
+                    break
+        else:
+            dataTable[4] = -1
 
     def load_DataList_plot(self):
         global rxdataList
@@ -293,8 +314,20 @@ class ArduinoApp(QMainWindow):
         for i in range(len(rxdataList)):
             self.cb_lcd_3.addItem(rxdataList[i].get_ID())
 
+    def load_DataList_gauge(self):
+        global rxdataList
+        self.cb_gauge.clear()
+        self.cb_gauge.addItem('')
+        for i in range(len(rxdataList)):
+            self.cb_gauge.addItem(rxdataList[i].get_ID())
+
     def connect_Function(self):
         # Serial Connect Part #
+        
+        pass
+    
+    def load_serialPort(self):
+        # Load Serial Port #
         pass
 
     def logging_Function(self):
@@ -315,6 +348,8 @@ class ArduinoApp(QMainWindow):
             self.lcd_1.display(str(rxdataList[dataTable[2]].get_Data()))
         if dataTable[3] != -1:
             self.lcd_1.display(str(rxdataList[dataTable[3]].get_Data()))
+        if dataTable[4] != -1:
+            self.gauge_data = rxdataList[dataTable[4]].get_Data()
 
 
     def closeEvent(self, a0: QCloseEvent) -> None:
@@ -352,4 +387,4 @@ if __name__ == '__main__':
     task1.start()
     app = QApplication(sys.argv)
     ex = ArduinoApp()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_())   

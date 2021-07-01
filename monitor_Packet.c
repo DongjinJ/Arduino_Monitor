@@ -1,6 +1,6 @@
 #include "monitor_Packet.h"
 
-packet Encoding_Packet(uint8_t rw, uint8_t id, uint8_t data){
+packet Encoding_Packet(uint8_t rw, uint8_t id, uint16_t data){
     packet returnPacket;
     returnPacket.R.rw = rw;
     returnPacket.R.id = id;
