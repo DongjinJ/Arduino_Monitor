@@ -13,6 +13,7 @@ from threading import Thread
 import atexit
 import math
 import serial
+import serial.tools.list_ports as sp
 
 rxdataList = []
 dataTable = [-1, -1, -1, -1, -1]
@@ -323,12 +324,17 @@ class ArduinoApp(QMainWindow):
 
     def connect_Function(self):
         # Serial Connect Part #
-        
+        self.ser = serial.Serial(str(self.cb_port.currentText()), 115200, timeout=1)
         pass
     
     def load_serialPort(self):
         # Load Serial Port #
-        pass
+        self.uartList = []
+        list = sp.comports()
+
+        for i in list:
+            self.uartList.append(i.device)
+        self.cb_port.addItems(self.uartList)
 
     def logging_Function(self):
         self.timer.start()
