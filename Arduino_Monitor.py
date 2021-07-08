@@ -18,6 +18,8 @@ import serial.tools.list_ports as sp
 rxdataList = []
 dataTable = [-1, -1, -1, -1, -1]
 quit_flag = False
+connect_flag = False
+ser = None
 
 def quit_Action():
     global quit_flag
@@ -33,9 +35,9 @@ class ComboBox(QComboBox):
 
 class ArduinoApp(QMainWindow):
     global rxdataList
-
     def __init__(self):
         super().__init__()
+        self.serialTask = None
 
         self.pen = QPen(QColor(0, 0, 0, 255))
         self.pen.setWidth(2)
@@ -51,6 +53,7 @@ class ArduinoApp(QMainWindow):
         # Serial Port ComboBox #
         self.cb_port = ComboBox(self)
         self.cb_port.addItem("Port")
+        self.cb_port.popupAboutToBeShown.connect(self.load_serialPort)
         self.cb_port.setGeometry(15, 10, 100, 25)
 
 
@@ -245,7 +248,7 @@ class ArduinoApp(QMainWindow):
     def select_data_plot(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
-                if rxdataList[i].get_ID() == cur_ID:
+                if str(rxdataList[i].get_ID()) == cur_ID:
                     dataTable[0] = i
                     break
         else:
@@ -254,7 +257,7 @@ class ArduinoApp(QMainWindow):
     def select_data_lcd1(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
-                if rxdataList[i].get_ID() == cur_ID:
+                if str(rxdataList[i].get_ID()) == cur_ID:
                     dataTable[1] = i
                     break
         else:
@@ -263,7 +266,7 @@ class ArduinoApp(QMainWindow):
     def select_data_lcd2(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
-                if rxdataList[i].get_ID() == cur_ID:
+                if str(rxdataList[i].get_ID()) == cur_ID:
                     dataTable[2] = i
                     break
         else:
@@ -272,7 +275,7 @@ class ArduinoApp(QMainWindow):
     def select_data_lcd3(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
-                if rxdataList[i].get_ID() == cur_ID:
+                if str(rxdataList[i].get_ID()) == cur_ID:
                     dataTable[3] = i
                     break
         else:
@@ -281,7 +284,7 @@ class ArduinoApp(QMainWindow):
     def select_data_gauge(self, cur_ID):
         if cur_ID != '':
             for i in range(len(rxdataList)):
-                if rxdataList[i].get_ID() == cur_ID:
+                if str(rxdataList[i].get_ID()) == cur_ID:
                     dataTable[4] = i
                     break
         else:
@@ -292,40 +295,49 @@ class ArduinoApp(QMainWindow):
         self.cb_data_plot.clear()
         self.cb_data_plot.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_data_plot.addItem(rxdataList[i].get_ID())
+            self.cb_data_plot.addItem(str(rxdataList[i].get_ID()))
 
     def load_DataList_lcd1(self):
         global rxdataList
         self.cb_lcd_1.clear()
         self.cb_lcd_1.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_lcd_1.addItem(rxdataList[i].get_ID())
+            self.cb_lcd_1.addItem(str(rxdataList[i].get_ID()))
 
     def load_DataList_lcd2(self):
         global rxdataList
         self.cb_lcd_2.clear()
         self.cb_lcd_2.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_lcd_2.addItem(rxdataList[i].get_ID())
+            self.cb_lcd_2.addItem(str(rxdataList[i].get_ID()))
 
     def load_DataList_lcd3(self):
         global rxdataList
         self.cb_lcd_3.clear()
         self.cb_lcd_3.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_lcd_3.addItem(rxdataList[i].get_ID())
+            self.cb_lcd_3.addItem(str(rxdataList[i].get_ID()))
 
     def load_DataList_gauge(self):
         global rxdataList
         self.cb_gauge.clear()
         self.cb_gauge.addItem('')
         for i in range(len(rxdataList)):
-            self.cb_gauge.addItem(rxdataList[i].get_ID())
+            self.cb_gauge.addItem(str(rxdataList[i].get_ID()))
 
     def connect_Function(self):
         # Serial Connect Part #
-        self.ser = serial.Serial(str(self.cb_port.currentText()), 115200, timeout=1)
-        pass
+        global ser
+        global connect_flag
+        if ser != None:
+            if ser.is_open:
+                ser.close()
+                connect_flag = False
+                self.serialTask.join()
+        ser = serial.Serial(str(self.cb_port.currentText()), 115200, timeout=1)
+        connect_flag = True
+        self.serialTask = Thread(target=serial_Input)
+        self.serialTask.start()
     
     def load_serialPort(self):
         # Load Serial Port #
@@ -334,6 +346,7 @@ class ArduinoApp(QMainWindow):
 
         for i in list:
             self.uartList.append(i.device)
+        self.cb_port.clear()
         self.cb_port.addItems(self.uartList)
 
     def logging_Function(self):
@@ -351,17 +364,49 @@ class ArduinoApp(QMainWindow):
         if dataTable[1] != -1:
             self.lcd_1.display(str(rxdataList[dataTable[1]].get_Data()))
         if dataTable[2] != -1:
-            self.lcd_1.display(str(rxdataList[dataTable[2]].get_Data()))
+            self.lcd_2.display(str(rxdataList[dataTable[2]].get_Data()))
         if dataTable[3] != -1:
-            self.lcd_1.display(str(rxdataList[dataTable[3]].get_Data()))
+            self.lcd_3.display(str(rxdataList[dataTable[3]].get_Data()))
         if dataTable[4] != -1:
             self.gauge_data = rxdataList[dataTable[4]].get_Data()
 
 
     def closeEvent(self, a0: QCloseEvent) -> None:
         global quit_flag
+        global connect_flag
+        global ser
+        ser.close()
+        connect_flag = False
+        self.serialTask.join()
         quit_flag = True
         return super().closeEvent(a0)
+
+def serial_Input():
+    while connect_flag:
+        rx_buf = []
+        if ser.in_waiting:
+            for i in range(4):
+                rx_buf.append(ser.read())
+            id_temp, data_temp = DP.decode_Data(rx_buf)
+            print("id: ", type(id_temp), "/ Data: ", type(data_temp))
+            if id_temp != None or data_temp != None:
+                if not rxdataList:
+                    rxdataList.append(DP.arduinoData())
+                    rxdataList[-1].update_ID(id_temp)
+                    rxdataList[-1].update_Data(data_temp)
+                else:
+                    update = False
+                    for i in range(len(rxdataList)):
+                        if rxdataList[i].get_ID() == id_temp:
+                            rxdataList[i].update_Data(data_temp)
+                            update = True
+                        else:
+                            pass
+                    if update == False:
+                        rxdataList.append(DP.arduinoData())
+                        rxdataList[-1].update_ID(id_temp)
+                        rxdataList[-1].update_Data(data_temp)
+
 
 def debug_Input():
     global rxdataList
@@ -389,8 +434,8 @@ def debug_Input():
             print("[", rxdataList[i].get_ID(), "]: ", rxdataList[i].get_Data())
 
 if __name__ == '__main__':
-    task1 = Thread(target=debug_Input, args=())
-    task1.start()
+    #task1 = Thread(target=debug_Input, args=())
+    #task1.start()
     app = QApplication(sys.argv)
     ex = ArduinoApp()
     sys.exit(app.exec_())   

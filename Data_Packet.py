@@ -14,13 +14,7 @@ class arduinoData:
         return self.data
 
 def check_Checksum(packet):
-    buf = [0, 0, 0, 0]
-    buf[0] = (packet >> 24) & 0xFF
-    buf[1] = (packet >> 16) & 0xFF
-    buf[2] = (packet >> 8) & 0xFF
-    buf[3] = packet & 0xFF
-
-    checksum = buf[0] + buf[1] + buf[2] + buf[3]
+    checksum = int.from_bytes(packet[0],"big",signed=False) + int.from_bytes(packet[1],"big",signed=False) + int.from_bytes(packet[2],"big",signed=False) + int.from_bytes(packet[3],"big",signed=False)
     checksum = checksum & 0xFF
 
     if checksum == 0:
@@ -28,14 +22,15 @@ def check_Checksum(packet):
     else:
         return False
 
-def decode_Data(arduinoData, packet):
+def decode_Data(packet):
+    for i in range(4):
+        print("[", i, "]", int.from_bytes(packet[i],"big",signed=False))
     if check_Checksum(packet):
-        id = (packet >> 24) & 0x3F
-        data = (packet >> 8) & 0x00FFFF
-        arduinoData.update_ID(id)
-        arduinoData.update_Data(data)
+        id = int.from_bytes(packet[3],"big",signed=False) & 0x3F
+        data = ((int.from_bytes(packet[2],"big",signed=False) << 8) & 0xFF00) | (int.from_bytes(packet[1],"big",signed=False) & 0x00FF)
+        return id, data
     else:
-        pass
+        return None, None
     
 def create_Checksum(rw, id, data):
     buf = [0, 0, 0, 0]

@@ -10,7 +10,7 @@
 
 - [x] Timer 구현
 
-- [ ] Serial Connect 구현
+- [x] Serial Connect 구현
 
 - [x] Layout 구성
 
@@ -28,7 +28,7 @@
 
 - [x] Gauge UI 적용
 
-- [ ] C/C++ Packet 라이브러리 구현
+- [x] C/C++ Packet 라이브러리 구현
 
 - [ ] Arduino Demo 테스트
 
@@ -180,3 +180,41 @@
   : Demo Test를 위한 코드 구현
 
   : 아직 보드 테스트 미완료. Endian에 따라 Code 수정이 필요할 수도 있음
+
+---
+
+## 2021-07-06
+
+- 아두이노 Test 및 라이브러리 적용 
+
+- Serial 포트 불러오기 설정
+
+---
+
+## 2021-07-07
+
+- Serial Message Rx Thread 구현
+
+- Rx Queue를 통해 GUI와 Rx Thread 간 정보 공유
+
+- Serial Port용 ComboBox 완성
+
+  : Test는 필요
+
+-  GUI 내에서 Thread를 생성에 실행도도록 설계
+
+  : 실제 Arduino를 연결해두고 Test가 필요함
+
+---
+
+## 2021-07-08
+
+- Arduino Test 완료
+
+  : 통신 안정성 필요 (4 Byte단위로 끊어 읽는데 순서가 뒤바뀌는 경우가 발생)
+
+- 오타 및 connect 수정
+
+- Data_Packet 오류 수정
+
+  : 디버깅 시 Type 이나 Endian 문제 발생 해결
