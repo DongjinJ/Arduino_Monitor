@@ -22,7 +22,7 @@
 
 - [x] 데이터 Class 구축 필요
 
-- [ ] 실제 Serial Data를 통해 Debugging 필요
+- [x] 실제 Serial Data를 통해 Debugging 필요
 
   : 현재 Terminal input값으로는 테스트 잘됨
 
@@ -31,6 +31,10 @@
 - [x] C/C++ Packet 라이브러리 구현
 
 - [ ] Arduino Demo 테스트
+
+  : 복수개의 Data를 전송하였을때도 이상없는지 확인 필요
+
+- [ ] Logging Data 저장 기능
 
 ---
 
@@ -218,3 +222,25 @@
 - Data_Packet 오류 수정
 
   : 디버깅 시 Type 이나 Endian 문제 발생 해결
+
+---
+
+## 2021-07-09
+
+- Serial Connect 상태를 나타내는 Label 추가
+
+- Gauge 눈금 변경 Logic 검토
+
+  : 환경에 따라 Max값을 변경할 수 있는 방향으로 개선 필요
+
+  : 사용자가 Max값을 조정함에 따라 가시성이 확보되는 눈금간격 계산 로직 필요
+
+- QTimer Start 시점 이동
+
+  logging button -> Connect Button
+
+  : 이게 더 직관적인 것 같음.
+
+- Pause 버튼 추가 여부 검토
+
+  
