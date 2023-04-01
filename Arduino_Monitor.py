@@ -389,7 +389,8 @@ class ArduinoApp(QMainWindow):
         global quit_flag
         global connect_flag
         global ser
-        ser.close()
+        if ser != None:
+            ser.close()
         connect_flag = False
         self.serialTask.join()
         quit_flag = True
